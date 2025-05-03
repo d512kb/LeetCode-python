@@ -5,35 +5,26 @@ from functools import reduce
 from itertools import combinations
 from typing import List
 
-class Codec:
-    _longToShort = {}
-    _shortToLong = {}
-    _currentId = 0
-    _charSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    _maxChar = len(_charSet)
+class Solution:
+    def smallestNumber(self, pattern: str) -> str:
+        stack = [1]
+        ans = []
+        nextVal = 0;
 
-    def encode(self, longUrl: str) -> str:
-        if (longUrl in self._longToShort):
-            return self._longToShort[longUrl]
+        for p in pattern:
+            if p == 'I':
+                nextVal = stack[-1] + 1
 
-        hash = self._generateHash(longUrl)
+                while len(stack) > 0:
+                    ans.append(stack[-1])
+                    stack.pop()
 
-        self._longToShort[longUrl] = hash
-        self._shortToLong[hash] = longUrl
+                stack.append(nextVal)
+            else:
+                stack.append(stack[-1] + 1)
 
-        return hash
+        while len(stack) > 0:
+            ans.append(stack[-1])
+            stack.pop()
 
-
-    def decode(self, shortUrl: str) -> str:
-        return self._shortToLong[shortUrl]
-
-    def _generateHash(self, longUrl):
-        self._currentId += 1
-        id = self._currentId
-        hash = []
-
-        while id != 0:
-            hash.append(self._charSet[id % self._maxChar])
-            id = id // self._maxChar
-
-        return ''.join(hash)
+        return ''.join(map(lambda x: str(x), ans))
