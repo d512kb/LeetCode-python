@@ -5,22 +5,35 @@ from functools import reduce
 from itertools import combinations
 from typing import List
 
-class Solution:
-    def countMaxOrSubsets(self, nums: List[int]) -> int:
-        maxOr = reduce(operator.or_, nums, 0)
-        ans = 0
+class Codec:
+    _longToShort = {}
+    _shortToLong = {}
+    _currentId = 0
+    _charSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    _maxChar = len(_charSet)
 
-        def calc(index, num) -> None:
-            nonlocal ans
+    def encode(self, longUrl: str) -> str:
+        if (longUrl in self._longToShort):
+            return self._longToShort[longUrl]
 
-            if (index == len(nums)):
-                if (num == maxOr):
-                    ans += 1
-                return
+        hash = self._generateHash(longUrl)
 
-            calc(index+1, num)
-            calc(index+1, num | nums[index])
+        self._longToShort[longUrl] = hash
+        self._shortToLong[hash] = longUrl
 
-        calc(0, 0)
+        return hash
 
-        return ans
+
+    def decode(self, shortUrl: str) -> str:
+        return self._shortToLong[shortUrl]
+
+    def _generateHash(self, longUrl):
+        self._currentId += 1
+        id = self._currentId
+        hash = []
+
+        while id != 0:
+            hash.append(self._charSet[id % self._maxChar])
+            id = id // self._maxChar
+
+        return ''.join(hash)
