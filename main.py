@@ -6,23 +6,33 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def canSortArray(self, nums: List[int]) -> bool:
-        minVal = maxVal = 0
-        prevMax = 0
+    def countGoodNodes(self, edges: List[List[int]]) -> int:
+        connections = defaultdict(list)
 
-        for n in nums:
-            if n.bit_count() == minVal.bit_count():
-                minVal = min(minVal, n)
-                maxVal = max(maxVal, n)
-            else:
-                if prevMax > minVal:
-                    return False
+        for edge in edges:
+            connections[edge[0]].append(edge[1])
+            connections[edge[1]].append(edge[0])
 
-                prevMax = maxVal
-                minVal = n
-                maxVal = n
+        ans = 0
 
-        if prevMax > minVal:
-            return False
+        def dfs(n, prev):
+            nonlocal ans
+            size = 1
+            childrenSizes = set()
 
-        return True
+            for child in connections[n]:
+                if child == prev:
+                    continue
+
+                childSize = dfs(child, n)
+                childrenSizes.add(childSize)
+                size += childSize
+
+            if len(childrenSizes) < 2:
+                ans += 1
+
+            return size
+
+        dfs(0, 0)
+
+        return ans
