@@ -6,14 +6,23 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def minEnd(self, n: int, x: int) -> int:
-        lastMask = n-1
+    def canSortArray(self, nums: List[int]) -> bool:
+        minVal = maxVal = 0
+        prevMax = 0
 
-        for pos in range(64):
-            if (x & (1 << pos)):
-                continue
+        for n in nums:
+            if n.bit_count() == minVal.bit_count():
+                minVal = min(minVal, n)
+                maxVal = max(maxVal, n)
+            else:
+                if prevMax > minVal:
+                    return False
 
-            x |= (lastMask & 1) << pos
-            lastMask >>= 1
+                prevMax = maxVal
+                minVal = n
+                maxVal = n
 
-        return x
+        if prevMax > minVal:
+            return False
+
+        return True
