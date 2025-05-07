@@ -6,33 +6,51 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def countGoodNodes(self, edges: List[List[int]]) -> int:
-        connections = defaultdict(list)
+    def regionsBySlashes(self, grid: List[str]) -> int:
+        sz = len(grid) + 1
+        parent = [-1] * sz * sz
 
-        for edge in edges:
-            connections[edge[0]].append(edge[1])
-            connections[edge[1]].append(edge[0])
+        def findParent(n):
+            if parent[n] < 0:
+                return n
 
-        ans = 0
+            parent[n] = findParent(parent[n])
+            return parent[n]
 
-        def dfs(n, prev):
-            nonlocal ans
-            size = 1
-            childrenSizes = set()
+        def join(a, b):
+            a = findParent(a)
+            b = findParent(b)
 
-            for child in connections[n]:
-                if child == prev:
-                    continue
+            if a == b:
+                return 1
 
-                childSize = dfs(child, n)
-                childrenSizes.add(childSize)
-                size += childSize
+            if a < b:
+                parent[a] += parent[b]
+                parent[b] = a
+            else:
+                parent[b] += parent[a]
+                parent[a] = b
 
-            if len(childrenSizes) < 2:
-                ans += 1
+            return 0
 
-            return size
+        def getUnionId(row, col):
+            return row * sz + col
 
-        dfs(0, 0)
+        for row in range(sz-1):
+            join(getUnionId(row, 0), getUnionId(row+1, 0))
+            join(getUnionId(row, sz-1), getUnionId(row+1, sz-1))
+
+        for col in range(sz-1):
+            join(getUnionId(0, col), getUnionId(0, col+1))
+            join(getUnionId(sz-1, col), getUnionId(sz-1, col+1))
+
+        ans = 1
+
+        for row in range(sz-1):
+            for col in range(sz-1):
+                if grid[row][col] == '/':
+                    ans += join(getUnionId(row, col+1), getUnionId(row+1, col))
+                elif grid[row][col] == '\\':
+                    ans += join(getUnionId(row, col), getUnionId(row+1, col+1))
 
         return ans
