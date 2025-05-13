@@ -9,31 +9,21 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def numberOfRightTriangles(self, grid: List[List[int]]) -> int:
-        rows = len(grid)
-        cols = len(grid[0])
+    def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
+        rows = len(mat)
 
-        onesByRow = [0] * rows
-        onesByColumn = [0] * cols
+        for r in mat:
+            r.sort()
 
-        for row in range(rows):
-            onesByRow[row] = sum(grid[row])
+        possible_sums = {0}
 
-        for col in range(cols):
-            ones = 0
-            for row in range(rows):
-                ones += grid[row][col]
+        for row in mat:
+            next_sums = set()
+            for val in row:
+                for s in possible_sums:
+                    next_sums.add(s + val)
+                if val > target:
+                    break
+            possible_sums = next_sums
 
-            onesByColumn[col] = ones
-
-        ans = 0
-
-        for row in range(rows):
-            if onesByRow[row] == 0:
-                continue
-
-            for col in range(cols):
-                if (grid[row][col] == 1):
-                    ans += (onesByRow[row]-1) * (onesByColumn[col]-1)
-
-        return ans
+        return min(abs(s - target) for s in possible_sums)
