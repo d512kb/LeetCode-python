@@ -1,4 +1,5 @@
 import itertools
+import heapq
 import operator
 
 from collections import defaultdict
@@ -8,36 +9,39 @@ from typing import List
 from dataclasses import dataclass
 
 @dataclass
-class PopularCreator:
-    totalViews: int = 0
-    topVideoViews: int = 0
-    topVideoId: str = chr(ord('z')+1)
+class ArrayElement:
+    val: int = 0
+    arrayIndex: int = 0
 
 class Solution:
-    def mostPopularCreator(self, creators: List[str], ids: List[str], views: List[int]) -> List[List[str]]:
-        sz = len(creators)
+    def maxDistance(self, arrays: List[List[int]]) -> int:
+        minElements = [ArrayElement(arrays[0][0], 0), ArrayElement(arrays[1][0], 1)]
+        maxElements = [ArrayElement(arrays[0][-1], 0), ArrayElement(arrays[1][-1], 1)]
 
-        mostViews = 0
-        popularCreators = defaultdict(PopularCreator)
+        def sortMins():
+            if minElements[0].val > minElements[1].val:
+                minElements[0], minElements[1] = minElements[1], minElements[0]
 
-        for i in range(sz):
-            creatorId = creators[i]
+        def sortMaxes():
+            if maxElements[0].val < maxElements[1].val:
+                maxElements[0], maxElements[1] = maxElements[1], maxElements[0]
 
-            popularCreators[creatorId].totalViews += views[i]
+        sortMins()
+        sortMaxes()
 
-            if popularCreators[creatorId].topVideoViews < views[i]:
-                popularCreators[creatorId].topVideoViews = views[i]
-                popularCreators[creatorId].topVideoId = ids[i]
-            elif popularCreators[creatorId].topVideoViews == views[i] and ids[i] < popularCreators[creatorId].topVideoId:
-                popularCreators[creatorId].topVideoId = ids[i]
+        for i in range(2, len(arrays)):
+            if arrays[i][0] < minElements[1].val:
+                minElements[1] = ArrayElement(arrays[i][0], i)
+                sortMins()
 
-            if popularCreators[creatorId].totalViews > mostViews:
-                mostViews = popularCreators[creatorId].totalViews
+            if arrays[i][-1] > maxElements[1].val:
+                maxElements[1] = ArrayElement(arrays[i][-1], i)
+                sortMaxes()
 
-        ans = []
+        if minElements[0].arrayIndex != maxElements[0].arrayIndex:
+            return abs(minElements[0].val - maxElements[0].val)
 
-        for id, creator in popularCreators.items():
-            if creator.totalViews == mostViews:
-                ans.append([id, creator.topVideoId])
+        firstDiff = abs(minElements[0].val - maxElements[1].val)
+        secondDiff = abs(minElements[1].val - maxElements[0].val)
 
-        return ans
+        return max(firstDiff, secondDiff)
