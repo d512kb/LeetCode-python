@@ -9,21 +9,22 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def minimizeTheDifference(self, mat: List[List[int]], target: int) -> int:
-        rows = len(mat)
+    def lexicalOrder(self, n: int) -> List[int]:
+        ans = []
+        current = 1
 
-        for r in mat:
-            r.sort()
+        for _ in range(n):
+            # Add the current number to the result list
+            ans.append(current)
 
-        possible_sums = {0}
+            # If multiplying by 10 is valid, move to the next lexicographical branch
+            if current * 10 <= n:
+                current *= 10
+            else:
+                # Otherwise, backtrack to find the next valid number
+                while current % 10 == 9 or current + 1 > n:
+                    current //= 10  # Move up one level in the lexicographical tree
+                current += 1  # Move to the next number
 
-        for row in mat:
-            next_sums = set()
-            for val in row:
-                for s in possible_sums:
-                    next_sums.add(s + val)
-                if val > target:
-                    break
-            possible_sums = next_sums
-
-        return min(abs(s - target) for s in possible_sums)
+        # Return the result list
+        return ans
