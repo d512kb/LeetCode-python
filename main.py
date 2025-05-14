@@ -9,17 +9,10 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def lastRemaining(self, n: int) -> int:
-        left = 1
-        step = 1
-        ltr = True
+    def findTheWinner(self, n: int, k: int) -> int:
+        ans = 0
 
-        while n > 1:
-            if ltr or n % 2 == 1:
-                left += step
+        for i in range(1, n+1):
+            ans = (ans + k) % i
 
-            n >>= 1
-            step <<= 1
-            ltr = not ltr
-
-        return left
+        return ans + 1
