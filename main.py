@@ -9,10 +9,18 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def findTheWinner(self, n: int, k: int) -> int:
-        ans = 0
+    def resultsArray(self, nums: List[int], k: int) -> List[int]:
+        sz = len(nums)
+        conseq = 1
+        ans = []
 
-        for i in range(1, n+1):
-            ans = (ans + k) % i
+        for i in range(sz):
+            if i > 0 and nums[i]-nums[i-1] == 1:
+                conseq += 1
+            else:
+                conseq = 1
 
-        return ans + 1
+            if i+1 >= k:
+                ans.append(nums[i] if conseq >= k else -1)
+
+        return ans
