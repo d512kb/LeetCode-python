@@ -9,15 +9,17 @@ from functools import reduce
 from typing import List
 
 class Solution:
-    def getSumAbsoluteDifferences(self, nums: List[int]) -> List[int]:
-        sz = len(nums)
-        leftSum = 0
-        rightSum = sum(nums)
-        ans = [0] * sz
+    def minSteps(self, n: int) -> int:
+        dp = [0] * (n+1)
 
-        for index, num in enumerate(nums):
-            rightSum -= num
-            ans[index] = (num * index - leftSum) + (rightSum - num * (sz-index-1))
-            leftSum += num
+        for i in range(2, n+1):
+            dp[i] = i
 
-        return ans
+        for i in range(2, n//2):
+            ops = dp[i] + 2
+
+            for multIndex in range(2*i, n+1, i):
+                dp[multIndex] = ops
+                ops += 1
+
+        return dp[-1]
