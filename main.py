@@ -7,39 +7,65 @@ from collections import defaultdict
 from collections import deque
 from dataclasses import dataclass
 from functools import reduce
+from math import inf
 from typing import List
 
-class Node:
-    def __init__(self):
-        self.word = False
-        self.children = {}
-
 class Solution:
-    def minExtraChar(self, s: str, dictionary: List[str]) -> int:
-        sz = len(s)
-        dp = [0] * (sz + 1)
-        root = Node()
+    def mostProfitablePath(self, edges: List[List[int]], bob: int, amount: List[int]) -> int:
+        tree = defaultdict(list)
 
-        for word in dictionary:
-            node = root
+        for edge in edges:
+            tree[edge[0]].append(edge[1])
+            tree[edge[1]].append(edge[0])
 
-            for ch in word:
-                if ch not in node.children:
-                    node.children[ch] = Node()
-                node = node.children[ch]
+        visited = [False] * len(amount)
+        bobTimings = {}
 
-            node.word = True
+        def buildPathToBob(node, time):
+            visited[node] = True
+            bobTimings[node] = time
 
-        for n in range(sz-1, -1, -1):
-            node = root
-            dp[n] = 1 + dp[n+1]
+            if node == 0:
+                return True
 
-            for i in range(n, sz):
-                if s[i] not in node.children:
-                    break
+            for nextNode in tree[node]:
+                if visited[nextNode]:
+                    continue
 
-                node = node.children[s[i]]
-                if node.word:
-                    dp[n] = min(dp[n], dp[i+1])
+                if buildPathToBob(nextNode, time+1):
+                    return True
 
-        return dp[0]
+            bobTimings.pop(node)
+
+            return False
+
+        buildPathToBob(bob, 0)
+
+        visited = [False] * len(amount)
+        ans = -inf
+
+        def explorePaths(node, profit, time):
+            nonlocal ans
+            visited[node] = True
+
+            if node not in bobTimings or time < bobTimings[node]:
+                profit += amount[node]
+            elif time == bobTimings[node]:
+                profit += amount[node] // 2
+
+            lastNode = True
+
+            for nextNode in tree[node]:
+                if visited[nextNode]:
+                    continue
+
+                lastNode = False
+
+                explorePaths(nextNode, profit, time+1)
+
+            if lastNode:
+                ans = max(ans, profit)
+
+        explorePaths(0, 0, 0)
+
+        return int(ans)
